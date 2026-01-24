@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>로또 번호 생성기</title>
+    <!-- Tailwind CSS CDN을 연결해요 - 이것으로 모든 디자인을 할 거예요 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+    <!--
+        전체 컨테이너:
+        - flex: 세로로 요소들을 배치하는 상자
+        - min-h-screen: 화면 전체 높이만큼 크기를 차지
+        - items-center: 가운데 정렬
+        - justify-center: 세로 방향 가운데 정렬
+        - py-8: 위아래 여백 8단위
+        - px-4: 좌우 여백 4단위
+    -->
+    <div class="flex flex-col items-center justify-center min-h-screen py-8 px-4">
+
+        <!-- 메인 카드 영역 -->
+        <!--
+            bg-white: 흰색 배경
+            rounded-2xl: 모서리를 둥글게
+            shadow-2xl: 큰 그림자 효과
+            p-8: 안쪽 여백 8단위
+            max-w-4xl: 최대 너비 제한
+            w-full: 가로폭 100%
+        -->
+        <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-4xl w-full">
+
+            <!-- 헤더 섹션 -->
+            <div class="text-center mb-8">
+                <!--
+                    로또 로고 이미지 영역
+                    mx-auto: 좌우 가운데 정렬
+                    mb-4: 아래 여백 4단위
+                -->
+                <div class="mx-auto mb-4 w-20 h-20 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-lg">
+                    <!--
+                        텍스트 스타일:
+                        text-white: 흰색 글자
+                        text-3xl: 글자 크기 3xl (매우 큼)
+                        font-bold: 글자 두께 굵게
+                    -->
+                    <span class="text-white text-3xl font-bold">🍀</span>
+                </div>
+                <!-- 제목 -->
+                <h1 class="text-4xl font-bold text-gray-800 mb-2">로또 번호 생성기</h1>
+                <!-- 부제목 -->
+                <p class="text-gray-600">행운의 번호를 추천해드립니다</p>
+            </div>
+
+            <!-- 생성 개수 선택 영역 -->
+            <div class="mb-8">
+                <h2 class="text-xl font-semibold text-gray-700 mb-4 text-center">생성할 게임 수를 선택하세요</h2>
+
+                <!--
+                    버튼 그룹 컨테이너
+                    grid: 격자 형태로 배치
+                    grid-cols-5: 5개의 열로 나누기
+                    gap-3: 버튼 사이 간격 3단위
+                    max-w-md: 최대 너비 제한
+                    mx-auto: 가운데 정렬
+                -->
+                <div class="grid grid-cols-5 gap-3 max-w-md mx-auto">
+                    <!--
+                        각 버튼의 스타일:
+                        game-count-btn: 나중에 JavaScript에서 찾기 위한 클래스
+                        bg-gradient-to-r: 그라디언트 배경 (왼쪽에서 오른쪽으로)
+                        from-blue-500 to-blue-600: 파란색 계열 그라디언트
+                        hover:from-blue-600 hover:to-blue-700: 마우스 올리면 더 진한 파란색
+                        text-white: 흰색 글자
+                        font-bold: 굵은 글자
+                        py-4: 위아래 여백 4단위
+                        rounded-lg: 모서리 둥글게
+                        shadow-md: 중간 그림자
+                        transition: 부드러운 효과 전환
+                        transform hover:scale-105: 마우스 올리면 크기 1.05배
+                    -->
+                    <button class="game-count-btn bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold py-4 rounded-lg shadow-md transition transform hover:scale-105" data-count="1">
+                        1
+                    </button>
+                    <button class="game-count-btn bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold py-4 rounded-lg shadow-md transition transform hover:scale-105" data-count="2">
+                        2
+                    </button>
+                    <button class="game-count-btn bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold py-4 rounded-lg shadow-md transition transform hover:scale-105" data-count="3">
+                        3
+                    </button>
+                    <button class="game-count-btn bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold py-4 rounded-lg shadow-md transition transform hover:scale-105" data-count="4">
+                        4
+                    </button>
+                    <button class="game-count-btn bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold py-4 rounded-lg shadow-md transition transform hover:scale-105" data-count="5">
+                        5
+                    </button>
+                </div>
+            </div>
+
+            <!-- 번호 생성 버튼 -->
+            <!--
+                w-full: 가로폭 100%
+                bg-gradient-to-r: 그라디언트 배경
+                from-yellow-400 to-orange-500: 노란색에서 주황색으로
+                hover:from-yellow-500 hover:to-orange-600: 마우스 올리면 더 진한 색
+                text-white: 흰색 글자
+                text-xl: 큰 글자
+                font-bold: 굵은 글자
+                py-4: 위아래 여백
+                rounded-xl: 모서리 둥글게
+                shadow-lg: 큰 그림자
+                transition: 부드러운 효과
+                transform hover:scale-102: 마우스 올리면 살짝 커짐
+                mb-8: 아래 여백
+            -->
+            <button id="generateBtn" class="w-full bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white text-xl font-bold py-4 rounded-xl shadow-lg transition transform hover:scale-102 mb-8">
+                🎱 행운의 번호 생성하기
+            </button>
+
+            <!-- 생성된 번호 표시 영역 -->
+            <div id="results" class="space-y-4">
+                <!--
+                    초기 안내 메시지
+                    text-center: 가운데 정렬
+                    text-gray-400: 회색 글자
+                    py-12: 위아래 여백
+                -->
+                <div class="text-center text-gray-400 py-12">
+                    <p class="text-lg">👆 개수를 선택하고 버튼을 눌러주세요</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 푸터 정보 -->
+        <!--
+            mt-8: 위 여백
+            text-center: 가운데 정렬
+            text-gray-600: 회색 글자
+            text-sm: 작은 글자
+        -->
+        <div class="mt-8 text-center text-gray-600 text-sm">
+            <p>※ 본 번호는 참고용이며, 당첨을 보장하지 않습니다.</p>
+        </div>
+    </div>
+
+    <!--
+        외부 JavaScript 파일 연결
+        이 파일에서 버튼 클릭 이벤트와 번호 생성 로직을 처리할 거예요
+    -->
+    <script src="client.js"></script>
+</body>
+</html>
