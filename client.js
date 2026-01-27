@@ -147,9 +147,43 @@ document.addEventListener('DOMContentLoaded', function() {
 // ============================================
 
 /**
- * 생성된 로또 번호를 예쁘게 화면에 표시하는 함수
+ * 번호 공의 색상을 업데이트하는 헬퍼 함수
  *
- * @param {Array} numbers - 6개의 로또 번호 배열
+ * 로또 번호 규칙에 따라 숫자 범위별로 다른 색상을 적용해요
+ *
+ * @param {HTMLElement} ball - 색상을 변경할 번호 공 요소
+ * @param {Number} number - 1~45 사이의 로또 번호
+ */
+function updateBallColor(ball, number) {
+    // 기존에 적용된 모든 색상 클래스를 먼저 제거해요
+    // 왜냐하면 숫자가 바뀔 때마다 색상도 바뀌어야 하니까요!
+    ball.classList.remove('bg-yellow-400', 'bg-blue-500', 'bg-red-500', 'bg-gray-600', 'bg-green-500');
+
+    // 번호 범위에 따라 새로운 색상 클래스를 추가해요
+    if (number <= 10) {
+        // 1~10: 노란색
+        ball.classList.add('bg-yellow-400');
+    } else if (number <= 20) {
+        // 11~20: 파란색
+        ball.classList.add('bg-blue-500');
+    } else if (number <= 30) {
+        // 21~30: 빨간색
+        ball.classList.add('bg-red-500');
+    } else if (number <= 40) {
+        // 31~40: 회색
+        ball.classList.add('bg-gray-600');
+    } else {
+        // 41~45: 초록색
+        ball.classList.add('bg-green-500');
+    }
+}
+
+/**
+ * 생성된 로또 번호를 카지노 슬롯머신 스타일로 화면에 표시하는 함수
+ *
+ * 숫자가 빠르게 돌아가다가 하나씩 순차적으로 멈추는 효과를 만들어요!
+ *
+ * @param {Array} numbers - 6개의 최종 로또 번호 배열
  * @param {Number} gameNumber - 게임 번호 (몇 번째 게임인지)
  */
 function displayLottoNumbers(numbers, gameNumber) {
@@ -180,68 +214,78 @@ function displayLottoNumbers(numbers, gameNumber) {
     // justify-center: 가운데 정렬
     numbersContainer.className = 'flex flex-wrap gap-3 justify-center';
 
-    // 6개의 번호를 하나씩 순차적으로 나타나게 해요 (다이나믹 효과!)
-    // forEach의 두 번째 매개변수 index를 사용해서 각 번호마다 다른 지연 시간을 줘요
-    numbers.forEach(function(number, index) {
-        // setTimeout: 일정 시간 후에 함수를 실행하는 타이머예요
-        // index * 300 = 첫 번째(0ms), 두 번째(300ms), 세 번째(600ms)... 순서로 실행돼요
+    // 6개의 번호 공이 카지노 슬롯머신처럼 돌아가는 효과! 🎰
+    // forEach의 두 번째 매개변수 index를 사용해서 각 공마다 다른 시간에 멈춰요
+    numbers.forEach(function(finalNumber, index) {
+        // 1단계: 번호를 표시할 span 요소를 만들어요
+        const numberBall = document.createElement('span');
+
+        // 공 모양의 기본 스타일을 적용해요
+        // w-14 h-14: 너비와 높이를 14단위로 (정사각형)
+        // rounded-full: 완전히 둥글게 (원형)
+        // flex items-center justify-center: 안의 숫자를 가운데 정렬
+        // text-white: 흰색 글자
+        // text-xl: 큰 글자
+        // font-bold: 굵은 글자
+        // shadow-lg: 큰 그림자 (입체감)
+        numberBall.className = 'w-14 h-14 rounded-full flex items-center justify-center text-white text-xl font-bold shadow-lg';
+
+        // 확대/축소 효과를 부드럽게 하기 위한 transition 설정
+        // transform만 0.2초 동안 부드럽게 변화해요 (멈출 때 확대 효과용)
+        numberBall.style.transition = 'transform 0.2s ease-out';
+
+        // 2단계: 번호 공을 즉시 컨테이너에 추가해요 (6개 모두 동시에 나타남)
+        numbersContainer.appendChild(numberBall);
+
+        // 3단계: 슬롯머신 회전 시작! 숫자가 빠르게 바뀌어요
+        // 먼저 시작 숫자를 랜덤으로 정해요
+        let currentNumber = Math.floor(Math.random() * 45) + 1;
+        numberBall.textContent = currentNumber;
+        updateBallColor(numberBall, currentNumber);
+
+        // setInterval: 일정 간격(50ms)마다 함수를 반복 실행하는 타이머예요
+        // 이걸로 숫자가 계속 바뀌는 "회전" 효과를 만들어요!
+        const spinInterval = setInterval(function() {
+            // 1부터 45 사이의 랜덤한 숫자를 만들어요
+            currentNumber = Math.floor(Math.random() * 45) + 1;
+
+            // 공에 표시된 숫자를 업데이트해요
+            numberBall.textContent = currentNumber;
+
+            // 숫자에 맞는 색상으로 변경해요 (노란색, 파란색, 빨간색...)
+            updateBallColor(numberBall, currentNumber);
+
+            // 이게 50ms(0.05초)마다 반복되니까 숫자가 엄청 빠르게 바뀌어 보여요!
+            // 1초에 20번 바뀌니까 진짜 슬롯머신처럼 돌아가는 것 같죠? 🎰
+        }, 50);
+
+        // 4단계: 각 공을 순차적으로 멈춰요!
+        // 첫 번째 공: 1초 후, 두 번째: 1.5초 후, 세 번째: 2초 후...
+        // 계산식: 1000ms(1초) + (공의 순서 × 500ms)
+        const stopDelay = 1000 + (index * 500);
+
+        // setTimeout: 정해진 시간(stopDelay) 후에 한 번만 함수를 실행해요
         setTimeout(function() {
-            // 번호를 표시할 span 요소를 만들어요
-            const numberBall = document.createElement('span');
+            // clearInterval: 반복 실행을 멈춰요
+            // 이제 숫자 회전이 멈춰요!
+            clearInterval(spinInterval);
 
-            // 번호 크기에 따라 다른 색상을 적용해요 (로또 번호 색상 규칙)
-            let colorClass = '';
-            if (number <= 10) {
-                // 1~10: 노란색
-                colorClass = 'bg-yellow-400';
-            } else if (number <= 20) {
-                // 11~20: 파란색
-                colorClass = 'bg-blue-500';
-            } else if (number <= 30) {
-                // 21~30: 빨간색
-                colorClass = 'bg-red-500';
-            } else if (number <= 40) {
-                // 31~40: 회색
-                colorClass = 'bg-gray-600';
-            } else {
-                // 41~45: 초록색
-                colorClass = 'bg-green-500';
-            }
+            // 최종 번호를 설정해요 (이게 진짜 당첨 번호예요!)
+            numberBall.textContent = finalNumber;
 
-            // 공 모양 스타일을 적용해요
-            // w-14 h-14: 너비와 높이를 14단위로 (정사각형)
-            // rounded-full: 완전히 둥글게 (원형)
-            // flex items-center justify-center: 안의 숫자를 가운데 정렬
-            // text-white: 흰색 글자
-            // text-xl: 큰 글자
-            // font-bold: 굵은 글자
-            // shadow-lg: 큰 그림자 (입체감)
-            numberBall.className = `w-14 h-14 rounded-full flex items-center justify-center text-white text-xl font-bold shadow-lg ${colorClass}`;
+            // 최종 번호에 맞는 정확한 색상을 적용해요
+            updateBallColor(numberBall, finalNumber);
 
-            // 번호를 텍스트로 넣어요
-            numberBall.textContent = number;
+            // 5단계: 멈출 때 "딩!" 하면서 강조하는 효과
+            // 공을 1.2배로 확대했다가
+            numberBall.style.transform = 'scale(1.2)';
 
-            // 애니메이션을 위한 초기 상태 설정
-            // opacity: 투명도 (0 = 완전히 투명, 1 = 완전히 불투명)
-            // transform: 모양 변형 (scale(0.5) = 원래 크기의 50%)
-            // transition: 변화가 일어날 때 부드럽게 전환되도록 설정 (0.5초 동안)
-            numberBall.style.opacity = '0';
-            numberBall.style.transform = 'scale(0.5)';
-            numberBall.style.transition = 'all 0.5s ease-out';
-
-            // 번호 공을 컨테이너에 추가해요 (아직은 투명하고 작은 상태)
-            numbersContainer.appendChild(numberBall);
-
-            // requestAnimationFrame: 브라우저가 화면을 다시 그릴 준비가 되면 실행해요
-            // DOM에 추가한 직후 바로 스타일을 바꾸면 브라우저가 애니메이션을 건너뛸 수 있어서
-            // 다음 프레임에서 스타일을 변경해야 부드러운 애니메이션이 나와요
-            requestAnimationFrame(function() {
-                // 최종 상태로 변경: 완전히 보이고(opacity: 1) 원래 크기로(scale: 1)
-                // transition 속성 덕분에 이 변화가 0.5초에 걸쳐 부드럽게 일어나요
-                numberBall.style.opacity = '1';
+            // 0.2초 후에 다시 원래 크기로 돌아와요
+            // 이렇게 하면 멈춘 공이 통통 튀는 것처럼 보여요!
+            setTimeout(function() {
                 numberBall.style.transform = 'scale(1)';
-            });
-        }, index * 300); // 300ms = 0.3초 간격으로 각 번호가 나타나요
+            }, 200);
+        }, stopDelay);
     });
 
     // 게임 div에 제목과 번호들을 추가해요
