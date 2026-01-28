@@ -7,7 +7,100 @@
 let selectedGameCount = 1;
 
 // ============================================
-// 1단계: 로또 번호 생성 함수
+// 폭죽 효과를 위한 전역 변수들
+// ============================================
+
+/**
+ * 완료된 게임 수를 추적하는 변수
+ * 모든 게임이 완료되면 폭죽을 실행하기 위해 사용해요
+ */
+let completedGamesCount = 0;
+
+/**
+ * 전체 게임 수 (사용자가 선택한 개수: 1~5)
+ * 이 값과 completedGamesCount가 같아지면 폭죽!
+ */
+let totalGamesCount = 0;
+
+/**
+ * 폭죽이 이미 실행되었는지 확인하는 플래그
+ * 중복 실행 방지용
+ */
+let isConfettiTriggered = false;
+
+// ============================================
+// 1단계: 화려한 폭죽 효과 함수
+// ============================================
+
+/**
+ * 화려한 폭죽 효과를 실행하는 함수 🎆
+ *
+ * canvas-confetti 라이브러리를 사용하여
+ * 로또 색상 테마(노랑, 파랑, 빨강, 초록)의 폭죽을 터뜨려요!
+ */
+function launchConfetti() {
+    // 로또 공의 색상들을 16진수 색상 코드로 변환
+    // 이 색상들이 폭죽에 사용됩니다!
+    const lottoColors = [
+        '#fbbf24',  // 노란색 (1~10번 공)
+        '#3b82f6',  // 파란색 (11~20번 공)
+        '#ef4444',  // 빨간색 (21~30번 공)
+        '#22c55e'   // 초록색 (41~45번 공)
+        // 회색(31~40번)은 화려함을 위해 제외
+    ];
+
+    // 폭죽 효과 설정
+    const duration = 3000; // 3초 동안 폭죽이 터집니다
+    const animationEnd = Date.now() + duration;
+
+    // 랜덤 값을 생성하는 헬퍼 함수
+    function randomInRange(min, max) {
+        return Math.random() * (max - min) + min;
+    }
+
+    // 폭죽 애니메이션을 반복 실행하는 인터벌
+    const interval = setInterval(function() {
+        const timeLeft = animationEnd - Date.now();
+
+        // 3초가 지나면 폭죽 멈춤
+        if (timeLeft <= 0) {
+            clearInterval(interval);
+            return;
+        }
+
+        // 폭죽의 입자 개수 (시간이 지날수록 줄어듦)
+        const particleCount = 50 * (timeLeft / duration);
+
+        // 왼쪽에서 폭죽 발사! 🎆
+        confetti({
+            particleCount: particleCount,
+            startVelocity: 30,           // 폭죽 속도
+            spread: 360,                 // 360도 전방향으로 퍼짐
+            origin: {
+                x: randomInRange(0.1, 0.3), // 화면 왼쪽 10~30% 지점
+                y: Math.random() - 0.2      // 화면 세로 랜덤 위치
+            },
+            colors: lottoColors          // 로또 색상 사용!
+        });
+
+        // 오른쪽에서도 폭죽 발사! 🎆
+        confetti({
+            particleCount: particleCount,
+            startVelocity: 30,
+            spread: 360,
+            origin: {
+                x: randomInRange(0.7, 0.9), // 화면 오른쪽 70~90% 지점
+                y: Math.random() - 0.2
+            },
+            colors: lottoColors
+        });
+    }, 250); // 0.25초(250ms)마다 폭죽 발사
+
+    console.log('🎉 폭죽 효과 실행!');
+}
+
+// ============================================
+// 2단계: 로또 번호 생성 함수
 // ============================================
 
 /**
@@ -85,19 +178,22 @@ document.addEventListener('DOMContentLoaded', function() {
         // 각 버튼마다 클릭했을 때 실행할 함수를 연결해요
         button.addEventListener('click', function() {
 
-            // 먼저 모든 버튼의 강조 표시를 제거해요
+            // 1단계: 모든 버튼을 미선택 상태로 변경해요
             // (다른 버튼이 선택되어 있을 수 있으니까요)
             gameCountButtons.forEach(function(btn) {
-                // 파란색 스타일을 제거하고
-                btn.classList.remove('from-blue-600', 'to-blue-700');
-                // 기본 파란색 스타일로 돌려놔요
-                btn.classList.add('from-blue-500', 'to-blue-600');
+                // 선택 클래스를 제거하고
+                btn.classList.remove('game-btn-selected');
+                // 미선택 클래스를 추가해요
+                btn.classList.add('game-btn-unselected');
             });
 
-            // 클릭된 버튼만 진한 파란색으로 강조해요
-            this.classList.remove('from-blue-500', 'to-blue-600');
-            this.classList.add('from-blue-600', 'to-blue-700');
+            // 2단계: 클릭된 버튼만 선택 상태로 변경해요
+            // 미선택 클래스를 제거하고
+            this.classList.remove('game-btn-unselected');
+            // 선택 클래스를 추가해요
+            this.classList.add('game-btn-selected');
 
+            // 3단계: 선택된 개수를 저장해요
             // 버튼의 data-count 속성에서 개수 값을 가져와요
             // getAttribute는 HTML 속성 값을 읽어와요
             // Number()로 문자열을 숫자로 변환해요
@@ -110,8 +206,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 첫 번째 버튼(1개)을 기본으로 선택된 상태로 만들어요
     if (gameCountButtons.length > 0) {
-        gameCountButtons[0].classList.remove('from-blue-500', 'to-blue-600');
-        gameCountButtons[0].classList.add('from-blue-600', 'to-blue-700');
+        // 미선택 클래스를 제거하고
+        gameCountButtons[0].classList.remove('game-btn-unselected');
+        // 선택 클래스를 추가해요
+        gameCountButtons[0].classList.add('game-btn-selected');
     }
 
     // ============================================
@@ -126,6 +224,14 @@ document.addEventListener('DOMContentLoaded', function() {
      */
     generateBtn.addEventListener('click', function() {
         console.log('번호 생성 시작! 게임 수:', selectedGameCount);
+
+        // ============================================
+        // 폭죽 효과를 위한 초기화
+        // ============================================
+        // 새로 생성할 때마다 카운터와 플래그를 리셋해요
+        completedGamesCount = 0;           // 완료된 게임 수 0으로
+        totalGamesCount = selectedGameCount;   // 총 게임 수 저장
+        isConfettiTriggered = false;       // 폭죽 플래그 리셋
 
         // 결과 영역을 비워요 (이전 결과를 지우기 위해)
         resultsDiv.innerHTML = '';
@@ -147,34 +253,43 @@ document.addEventListener('DOMContentLoaded', function() {
 // ============================================
 
 /**
- * 번호 공의 색상을 업데이트하는 헬퍼 함수
+ * 번호 공의 색상을 업데이트하는 헬퍼 함수 (3D 스타일)
  *
- * 로또 번호 규칙에 따라 숫자 범위별로 다른 색상을 적용해요
+ * 로또 번호 규칙에 따라 숫자 범위별로 다른 3D 그라디언트 색상을 적용해요!
+ * 이제 평면 색상이 아니라 입체적인 그라디언트로 진짜 공처럼 보여요.
+ * index.html의 <style> 태그에 정의된 .lotto-ball-* 클래스를 사용합니다.
  *
  * @param {HTMLElement} ball - 색상을 변경할 번호 공 요소
  * @param {Number} number - 1~45 사이의 로또 번호
  */
 function updateBallColor(ball, number) {
-    // 기존에 적용된 모든 색상 클래스를 먼저 제거해요
-    // 왜냐하면 숫자가 바뀔 때마다 색상도 바뀌어야 하니까요!
-    ball.classList.remove('bg-yellow-400', 'bg-blue-500', 'bg-red-500', 'bg-gray-600', 'bg-green-500');
+    // 기존에 적용된 모든 3D 색상 클래스를 먼저 제거해요
+    // 슬롯머신 회전 중에는 숫자가 계속 바뀌니까 색상도 계속 바뀌어야 해요!
+    ball.classList.remove(
+        'lotto-ball-yellow',    // 노란색 3D 그라디언트 클래스
+        'lotto-ball-blue',      // 파란색 3D 그라디언트 클래스
+        'lotto-ball-red',       // 빨간색 3D 그라디언트 클래스
+        'lotto-ball-gray',      // 회색 3D 그라디언트 클래스
+        'lotto-ball-green'      // 초록색 3D 그라디언트 클래스
+    );
 
-    // 번호 범위에 따라 새로운 색상 클래스를 추가해요
+    // 번호 범위에 따라 3D 그라디언트 클래스를 추가해요
+    // 각 클래스는 radial-gradient로 입체감을 표현합니다!
     if (number <= 10) {
-        // 1~10: 노란색
-        ball.classList.add('bg-yellow-400');
+        // 1~10: 노란색 3D 공 (밝은 노랑 → 중간 노랑 → 진한 주황)
+        ball.classList.add('lotto-ball-yellow');
     } else if (number <= 20) {
-        // 11~20: 파란색
-        ball.classList.add('bg-blue-500');
+        // 11~20: 파란색 3D 공 (하늘색 → 파랑 → 네이비)
+        ball.classList.add('lotto-ball-blue');
     } else if (number <= 30) {
-        // 21~30: 빨간색
-        ball.classList.add('bg-red-500');
+        // 21~30: 빨간색 3D 공 (핑크 → 빨강 → 와인색)
+        ball.classList.add('lotto-ball-red');
     } else if (number <= 40) {
-        // 31~40: 회색
-        ball.classList.add('bg-gray-600');
+        // 31~40: 회색 3D 공 (밝은 회색 → 회색 → 진한 회색)
+        ball.classList.add('lotto-ball-gray');
     } else {
-        // 41~45: 초록색
-        ball.classList.add('bg-green-500');
+        // 41~45: 초록색 3D 공 (연두 → 초록 → 진한 초록)
+        ball.classList.add('lotto-ball-green');
     }
 }
 
@@ -217,22 +332,26 @@ function displayLottoNumbers(numbers, gameNumber) {
     // 6개의 번호 공이 카지노 슬롯머신처럼 돌아가는 효과! 🎰
     // forEach의 두 번째 매개변수 index를 사용해서 각 공마다 다른 시간에 멈춰요
     numbers.forEach(function(finalNumber, index) {
-        // 1단계: 번호를 표시할 span 요소를 만들어요
-        const numberBall = document.createElement('span');
+        // 1단계: 번호 공 요소를 만들어요 (div로 생성)
+        const numberBall = document.createElement('div');
 
-        // 공 모양의 기본 스타일을 적용해요
-        // w-14 h-14: 너비와 높이를 14단위로 (정사각형)
-        // rounded-full: 완전히 둥글게 (원형)
-        // flex items-center justify-center: 안의 숫자를 가운데 정렬
-        // text-white: 흰색 글자
-        // text-xl: 큰 글자
-        // font-bold: 굵은 글자
-        // shadow-lg: 큰 그림자 (입체감)
-        numberBall.className = 'w-14 h-14 rounded-full flex items-center justify-center text-white text-xl font-bold shadow-lg';
+        // 3D 입체 공 클래스를 적용해요!
+        // 이제 Tailwind 클래스 대신 index.html의 <style>에 정의된 .lotto-ball을 사용해요!
+        // .lotto-ball 클래스에는 다음이 모두 포함되어 있어요:
+        // - 크기 (56x56px)
+        // - 원형 (border-radius: 50%)
+        // - 중앙 정렬 (flexbox)
+        // - 4단계 다층 그림자 (내부 그림자 + 바닥 그림자 + 테두리)
+        // - ::before로 하이라이트(빛 반사) 효과
+        // - 부드러운 바운스 애니메이션 (cubic-bezier)
+        numberBall.className = 'lotto-ball';
 
-        // 확대/축소 효과를 부드럽게 하기 위한 transition 설정
-        // transform만 0.2초 동안 부드럽게 변화해요 (멈출 때 확대 효과용)
-        numberBall.style.transition = 'transform 0.2s ease-out';
+        // 숫자를 담을 span 요소를 만들어요
+        // 왜 span이 필요한가요?
+        // → CSS의 ::before로 만든 하이라이트(빛 반사)와 숫자의 z-index를 분리하기 위해서예요!
+        // → 이렇게 하면 숫자가 하이라이트 위에 선명하게 보입니다.
+        const numberSpan = document.createElement('span');
+        numberBall.appendChild(numberSpan);
 
         // 2단계: 번호 공을 즉시 컨테이너에 추가해요 (6개 모두 동시에 나타남)
         numbersContainer.appendChild(numberBall);
@@ -240,7 +359,8 @@ function displayLottoNumbers(numbers, gameNumber) {
         // 3단계: 슬롯머신 회전 시작! 숫자가 빠르게 바뀌어요
         // 먼저 시작 숫자를 랜덤으로 정해요
         let currentNumber = Math.floor(Math.random() * 45) + 1;
-        numberBall.textContent = currentNumber;
+        // numberBall 안의 span에 숫자를 표시해요 (하이라이트와 분리)
+        numberSpan.textContent = currentNumber;
         updateBallColor(numberBall, currentNumber);
 
         // setInterval: 일정 간격(50ms)마다 함수를 반복 실행하는 타이머예요
@@ -249,10 +369,11 @@ function displayLottoNumbers(numbers, gameNumber) {
             // 1부터 45 사이의 랜덤한 숫자를 만들어요
             currentNumber = Math.floor(Math.random() * 45) + 1;
 
-            // 공에 표시된 숫자를 업데이트해요
-            numberBall.textContent = currentNumber;
+            // 공에 표시된 숫자를 업데이트해요 (span에 표시)
+            numberSpan.textContent = currentNumber;
 
-            // 숫자에 맞는 색상으로 변경해요 (노란색, 파란색, 빨간색...)
+            // 숫자에 맞는 3D 그라디언트 색상으로 변경해요
+            // (노란색 → 파란색 → 빨간색 → 회색 → 초록색)
             updateBallColor(numberBall, currentNumber);
 
             // 이게 50ms(0.05초)마다 반복되니까 숫자가 엄청 빠르게 바뀌어 보여요!
@@ -271,9 +392,10 @@ function displayLottoNumbers(numbers, gameNumber) {
             clearInterval(spinInterval);
 
             // 최종 번호를 설정해요 (이게 진짜 당첨 번호예요!)
-            numberBall.textContent = finalNumber;
+            // span에 최종 숫자를 표시합니다
+            numberSpan.textContent = finalNumber;
 
-            // 최종 번호에 맞는 정확한 색상을 적용해요
+            // 최종 번호에 맞는 정확한 3D 그라디언트 색상을 적용해요
             updateBallColor(numberBall, finalNumber);
 
             // 5단계: 멈출 때 "딩!" 하면서 강조하는 효과
@@ -284,6 +406,29 @@ function displayLottoNumbers(numbers, gameNumber) {
             // 이렇게 하면 멈춘 공이 통통 튀는 것처럼 보여요!
             setTimeout(function() {
                 numberBall.style.transform = 'scale(1)';
+
+                // ============================================
+                // 폭죽 효과 트리거 로직
+                // ============================================
+                // 이 게임의 마지막 공(6번째 공)이 멈췄을 때만 실행
+                if (index === 5) {
+                    // 완료된 게임 수를 1 증가시켜요
+                    completedGamesCount++;
+
+                    console.log(`게임 ${gameNumber} 완료! (${completedGamesCount}/${totalGamesCount})`);
+
+                    // 모든 게임이 완료되었고, 아직 폭죽을 터뜨리지 않았다면
+                    if (completedGamesCount === totalGamesCount && !isConfettiTriggered) {
+                        // 폭죽 플래그를 true로 변경 (중복 실행 방지)
+                        isConfettiTriggered = true;
+
+                        // 약간의 딜레이 후 폭죽 실행 (공이 완전히 멈춘 후)
+                        setTimeout(function() {
+                            console.log('🎊 모든 게임 완료! 폭죽을 터뜨립니다!');
+                            launchConfetti(); // 폭죽 함수 실행!
+                        }, 300); // 300ms 딜레이 (여유 시간)
+                    }
+                }
             }, 200);
         }, stopDelay);
     });

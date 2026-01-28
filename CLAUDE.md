@@ -6,12 +6,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 로또 번호 생성기 웹 애플리케이션 - 사용자가 원하는 개수의 로또 번호를 생성하고, 슬롯머신 애니메이션으로 표시하는 정적 웹사이트입니다.
 
+**프로젝트 규모**: 약 450줄 (HTML 152줄 + JavaScript 297줄)
+
 ## 핵심 아키텍처
 
 ### 파일 구조
 - `index.html`: 메인 HTML 파일 (Tailwind CSS 사용)
 - `client.js`: 프론트엔드 JavaScript 로직
-- `screenshot.js`: Playwright를 사용한 자동 스크린샷 촬영 스크립트
 - `vercel.json`: Vercel 배포 설정
 
 ### 주요 컴포넌트
@@ -20,11 +21,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - 1~45 범위에서 중복 없이 6개의 랜덤 번호 생성
 - 오름차순 정렬하여 반환
 
-#### 2. 슬롯머신 애니메이션 시스템
-- `displayLottoNumbers()`: 번호를 시각적으로 표시
+#### 2. 슬롯머신 애니메이션 시스템 (`displayLottoNumbers()`)
 - 50ms 간격으로 랜덤 숫자를 회전시키는 `setInterval`
-- 각 번호를 순차적으로 멈추는 지연 효과 (500ms 간격)
-- 멈출 때 scale 애니메이션으로 강조
+- 각 번호를 순차적으로 멈추는 지연 효과 (공식: 1000ms + index × 500ms)
+  - 1번째 공: 1초 후, 2번째 공: 1.5초 후, 3번째 공: 2초 후...
+- 멈출 때 scale(1.2) 애니메이션으로 강조 (200ms 후 원래 크기로 복귀)
 
 #### 3. 색상 시스템 (`updateBallColor()`)
 - 1~10: 노란색 (`bg-yellow-400`)
@@ -41,15 +42,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 # 파이썬 내장 서버 사용 (포트 3001)
 python3 -m http.server 3001
 ```
-
-### 스크린샷 촬영
-Playwright를 사용한 자동 스크린샷:
-```bash
-# 먼저 로컬 서버가 3001 포트에서 실행 중이어야 함
-node screenshot.js
-```
-
-스크린샷은 `.agent-screenshots/` 디렉토리에 저장됩니다.
 
 ### 배포
 Vercel을 통한 자동 배포:
@@ -75,8 +67,8 @@ Vercel을 통한 자동 배포:
 
 ## 주요 기술 스택
 
-- **프론트엔드**: Vanilla JavaScript, Tailwind CSS
-- **테스팅**: Playwright (스크린샷 자동화)
+- **프론트엔드**: Vanilla JavaScript, Tailwind CSS (CDN)
+- **테스팅**: Playwright ^1.58.0
 - **배포**: Vercel (정적 사이트 호스팅)
 - **패키지 관리**: npm (CommonJS)
 
@@ -85,4 +77,3 @@ Vercel을 통한 자동 배포:
 1. **정적 사이트**: 서버 없이 순수 클라이언트 사이드로만 동작
 2. **애니메이션 중심**: 사용자 경험을 위한 슬롯머신 효과가 핵심
 3. **교육용 주석**: 코드 전체에 초보자를 위한 상세한 설명이 포함됨
-4. **환경 변수**: `.env.local` 파일 사용 (git에서 제외)
