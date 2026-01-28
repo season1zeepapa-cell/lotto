@@ -1,16 +1,6 @@
 {
   "version": 2,
   "name": "lotto",
-  "builds": [
-    {
-      "src": "index.html",
-      "use": "@vercel/static"
-    },
-    {
-      "src": "client.js",
-      "use": "@vercel/static"
-    }
-  ],
   "routes": [
     {
       "src": "/(.*)",
