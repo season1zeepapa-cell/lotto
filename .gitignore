@@ -1,4 +1,17 @@
-node_modules/
+# 서버 로그 파일
+server.log
+
+# 스크린샷 스크립트 (임시 파일)
 screenshot.js
+take-screenshot.sh
+
+# Node modules (나중에 필요할 경우)
+node_modules/
+
+# macOS 시스템 파일
+.DS_Store
 .vercel
 .env*.local
+
+# 자동 생성 파일 (빌드 시 생성되므로 Git 추적 불필요)
+#files.json
