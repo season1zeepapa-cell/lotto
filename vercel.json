@@ -1,5 +1,6 @@
 {
   "version": 2,
   "outputDirectory": ".",
-  "installCommand": "npm install"
+  "installCommand": "npm install",
+  "buildCommand": "echo 'Static site - no build needed'"
 }
